@@ -9,7 +9,7 @@ repository = "https://github.com/im-trisha/wallhaven-api-rs"
 homepage = "https://github.com/im-trisha/wallhaven-api-rs"
 documentation = "https://docs.rs/wallhaven-api"
 license = "MIT"
-license-file = "LICENSE.txt"
+license-file = "LICENSE"
 keywords = ["api", "wallhaven", "wrapper", "client"]
 
 [dependencies]
