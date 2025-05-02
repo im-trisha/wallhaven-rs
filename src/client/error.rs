@@ -6,7 +6,6 @@ use reqwest::header::InvalidHeaderValue;
 pub enum Error {
     InvalidApiKey,
     ErrorParsingPath,
-    SavingImage(image::ImageError),
     IoError(std::io::Error),
     UrlParsingError(url::ParseError),
     BuildingClient(reqwest::Error),
@@ -22,7 +21,6 @@ impl Display for Error {
                 f,
                 "While parsing this wallpaper's url, we couldn't detect the extension."
             ),
-            Self::SavingImage(err) => write!(f, "{}", err),
             Self::IoError(err) => write!(f, "{}", err),
             Self::UrlParsingError(err) => write!(f, "{}", err),
             Self::BuildingClient(err) => write!(f, "{}", err),
@@ -59,11 +57,5 @@ impl From<url::ParseError> for Error {
 impl From<std::io::Error> for Error {
     fn from(value: std::io::Error) -> Self {
         Error::IoError(value)
-    }
-}
-
-impl From<image::ImageError> for Error {
-    fn from(value: image::ImageError) -> Self {
-        Error::SavingImage(value)
     }
 }
