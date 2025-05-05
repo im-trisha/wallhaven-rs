@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::{tag::Tag, Thumbs};
+use super::{Thumbs, tag::Tag};
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct RawWallpaperInfo {
@@ -12,25 +12,24 @@ pub struct Wallpaper {
     pub id: String,
     pub url: String,
     pub short_url: String,
-    pub uploader: Uploader,
-    pub views: i64,
-    pub favorites: i64,
+    pub uploader: Option<Uploader>,
+    pub views: u64,
+    pub favorites: u64,
     pub source: String,
     pub purity: String,
     pub category: String,
-    pub dimension_x: i64,
-    pub dimension_y: i64,
+    pub dimension_x: u64,
+    pub dimension_y: u64,
     pub resolution: String,
     pub ratio: String,
-    pub file_size: i64,
+    pub file_size: u64,
     pub file_type: String,
     pub created_at: String,
     pub colors: Vec<String>,
     pub path: String,
     pub thumbs: Thumbs,
-    pub tags: Vec<Tag>,
+    pub tags: Option<Vec<Tag>>,
 }
-
 
 #[derive(Serialize, Deserialize)]
 pub struct Uploader {

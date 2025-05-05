@@ -7,9 +7,9 @@ pub(crate) struct RawUserCollection {
 
 #[derive(Serialize, Deserialize)]
 pub struct UserCollection {
-    pub id: i64,
+    pub id: u64,
     pub label: String,
-    pub views: i64,
-    pub public: i64,
-    pub count: i64,
+    pub views: u64,
+    pub public: u64,
+    pub count: u64,
 }

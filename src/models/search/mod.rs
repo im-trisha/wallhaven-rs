@@ -12,10 +12,10 @@ pub struct SearchResult {
 
 #[derive(Serialize, Deserialize)]
 pub struct Meta {
-    pub current_page: i64,
-    pub last_page: i64,
-    pub per_page: i64,
-    pub total: i64,
+    pub current_page: u64,
+    pub last_page: u64,
+    pub per_page: u64,
+    pub total: u64,
     pub query: Option<Query>,
     pub seed: Option<String>,
 }
@@ -28,6 +28,6 @@ pub enum Query {
 
 #[derive(Serialize, Deserialize)]
 pub struct TagQuery {
-    pub id: i64,
+    pub id: u64,
     pub tag: String,
 }

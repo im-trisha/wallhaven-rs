@@ -21,7 +21,7 @@ static BASE_URL: LazyLock<Url> =
     LazyLock::new(|| Url::from_str("https://wallhaven.cc/api/v1/").unwrap());
 
 impl WallhavenClient {
-    fn build_client(api_key: Option<&str>) -> Result<Client, Error> {
+    pub fn new(api_key: Option<&str>) -> Result<Self, Error> {
         let builder = Client::builder();
 
         let builder = match api_key {
@@ -33,16 +33,7 @@ impl WallhavenClient {
             }
         };
 
-        builder.build().map_err(|err| Error::from(err))
-    }
-
-    pub fn new(api_key: &str) -> Result<Self, Error> {
-        let client = Self::build_client(Some(api_key))?;
-        Ok(Self { client })
-    }
-
-    pub fn new_keyless() -> Result<Self, Error> {
-        let client = Self::build_client(None)?;
+        let client = builder.build().map_err(|err| Error::from(err))?;
         Ok(Self { client })
     }
 
@@ -81,12 +72,21 @@ impl WallhavenClient {
         Ok(raw_json.data)
     }
 
-    pub async fn collection_items(&self, username: &str, id: &str) -> Result<SearchResult, Error> {
+    pub async fn collection_items(&self, username: &str, id: u64) -> Result<SearchResult, Error> {
         let url = BASE_URL.join(&format!("collections/{username}/{id}"))?;
 
         let res = self.client.get(url).send().await?;
 
         Ok(res.json().await?)
+    }
+
+    pub async fn tag(&self, id: u64) -> Result<Tag, Error> {
+        let url = BASE_URL.join(&format!("tag/{id}"))?;
+
+        let res = self.client.get(url).send().await?;
+        let raw_json: RawTagInfo = res.json().await?;
+
+        Ok(raw_json.data)
     }
 
     pub async fn user_settings(&self) -> Result<UserSettings, Error> {
