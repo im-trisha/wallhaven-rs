@@ -1,6 +1,6 @@
 [package]
 name = "wallhaven-api"
-version = "0.0.1-dev"
+version = "0.1.0-dev"
 edition = "2024"
 
 authors = ["ImTrisha <imtrisha2324@gmail.com>"]

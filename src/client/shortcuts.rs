@@ -8,18 +8,23 @@ use crate::{Resolutions, Wallpaper};
 use super::{Error, WallhavenClient};
 
 impl Wallpaper {
-    pub async fn download(&self, client: &WallhavenClient, outdir: PathBuf) -> Result<(), Error> {
+    pub async fn download(
+        &self,
+        client: &WallhavenClient,
+        outdir: impl AsRef<Path>,
+    ) -> Result<PathBuf, Error> {
         let path = self.path.clone();
         let extension = Path::new(&path)
             .extension()
             .and_then(OsStr::to_str)
             .ok_or(crate::Error::ErrorParsingPath)?;
 
+        let outdir = outdir.as_ref();
         let filepath = outdir.join(format!("wallhaven-{}.{extension}", self.id));
 
-        client.download(path, &filepath).await?;
+        client.download(&path, &filepath).await?;
 
-        Ok(())
+        Ok(filepath)
     }
 }
 

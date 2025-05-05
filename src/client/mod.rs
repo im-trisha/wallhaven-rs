@@ -1,4 +1,4 @@
-use std::{path::PathBuf, str::FromStr, sync::LazyLock};
+use std::{path::Path, str::FromStr, sync::LazyLock};
 
 use futures::StreamExt;
 use reqwest::{Client, Url, header};
@@ -12,6 +12,7 @@ pub use error::*;
 
 use crate::models::*;
 
+#[derive(Clone)]
 pub struct WallhavenClient {
     client: Client,
 }
@@ -45,7 +46,7 @@ impl WallhavenClient {
         Ok(Self { client })
     }
 
-    pub async fn wallpaper(&self, id: String) -> Result<Wallpaper, Error> {
+    pub async fn wallpaper(&self, id: &str) -> Result<Wallpaper, Error> {
         let url = BASE_URL.join(&format!("w/{id}"))?;
 
         let res = self.client.get(url).send().await?;
@@ -54,7 +55,7 @@ impl WallhavenClient {
         Ok(raw_json.data)
     }
 
-    async fn download(&self, url: String, outpath: &PathBuf) -> Result<(), Error> {
+    async fn download(&self, url: &str, outpath: impl AsRef<Path>) -> Result<(), Error> {
         let resp = self.client.get(url).send().await?;
         let mut out = File::create(&outpath).await?;
 
@@ -67,10 +68,7 @@ impl WallhavenClient {
         Ok(())
     }
 
-    pub async fn collections(
-        &self,
-        username: Option<String>,
-    ) -> Result<Vec<UserCollection>, Error> {
+    pub async fn collections(&self, username: Option<&str>) -> Result<Vec<UserCollection>, Error> {
         let url = match username {
             None => "collections",
             Some(username) => &format!("collections/{username}"),
@@ -83,11 +81,7 @@ impl WallhavenClient {
         Ok(raw_json.data)
     }
 
-    pub async fn collection_items(
-        &self,
-        username: String,
-        id: String,
-    ) -> Result<SearchResult, Error> {
+    pub async fn collection_items(&self, username: &str, id: &str) -> Result<SearchResult, Error> {
         let url = BASE_URL.join(&format!("collections/{username}/{id}"))?;
 
         let res = self.client.get(url).send().await?;
