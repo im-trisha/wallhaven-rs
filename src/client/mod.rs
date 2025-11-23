@@ -1,17 +1,23 @@
-use std::{path::Path, str::FromStr, sync::LazyLock};
+use std::{str::FromStr, sync::LazyLock};
 
-use futures::StreamExt;
+use futures::Stream;
 use reqwest::{Client, Url, header};
-use tokio::fs::File;
 
 mod error;
 mod shortcuts;
-mod utils;
 
 pub use error::*;
 
-use crate::models::*;
+use crate::models::{raw_models::*, *};
 
+/// A wallhaven api client.
+///
+/// There are two ways of constructing this object, with or without an api key,
+/// see [`WallhavenClient::new`] and [`WallhavenClient::with_key`] for more details
+///
+/// ## Examples
+///
+/// ```
 #[derive(Clone)]
 pub struct WallhavenClient {
     client: Client,
@@ -20,51 +26,95 @@ pub struct WallhavenClient {
 static BASE_URL: LazyLock<Url> =
     LazyLock::new(|| Url::from_str("https://wallhaven.cc/api/v1/").unwrap());
 
-impl WallhavenClient {
-    pub fn new(api_key: Option<&str>) -> Result<Self, Error> {
-        let builder = Client::builder();
+macro_rules! request_errors {
+        () => {
+            "
+# Errors
 
-        let builder = match api_key {
-            None => builder,
-            Some(key) => {
-                let mut headers = header::HeaderMap::with_capacity(1);
-                headers.insert("X-API-Key", header::HeaderValue::from_str(key)?);
-                builder.default_headers(headers)
-            }
+- [`Error::UrlParsingError`] when the URL cannot be parsed
+- [`Error::SendingRequest`] an error while sending the request, you can get more details with the underlying error
+- [`Error::DecodingJson`] an error decoding the JSON, either wallhaven sent a wrong json, or we wrote a bad model
+- [`Error::UnknownRequestError`] - an unknown error when sending/receiving the request, you can match further the underlying error"
         };
+    }
 
-        let client = builder.build().map_err(|err| Error::from(err))?;
+macro_rules! download_errors {
+        () => {
+            "
+# Errors
+
+- [`Error::SendingRequest`] an error while sending the request, you can get more details with the underlying error
+- [`Error::UnknownRequestError`] - an unknown error when sending/receiving the request, you can match further the underlying error"
+    };
+}
+
+impl WallhavenClient {
+    /// Constructs [`WallhavenClient`] with an api key
+    /// Check out [`WallhavenClient::new`] to construct an instance without an api key.
+    /// The api key will be passed to the X-API-Key headers.
+    ///
+    /// # Errors
+    ///
+    /// - [`Error::InvalidApiKey`] when an invalid api key is passed as argument
+    /// - [`Error::BuildingClient`] when something went wrong with the Client builder, this shouldn't happen and you probably should file an issue
+    pub fn with_key(api_key: impl AsRef<str>) -> Result<Self, Error> {
+        let mut auth_header = header::HeaderValue::from_str(api_key.as_ref())?;
+        auth_header.set_sensitive(true);
+
+        let mut headers = header::HeaderMap::with_capacity(1);
+        headers.insert("X-API-Key", auth_header);
+
+        let client = Client::builder().default_headers(headers).build()?;
         Ok(Self { client })
     }
 
-    pub async fn wallpaper(&self, id: &str) -> Result<Wallpaper, Error> {
-        let url = BASE_URL.join(&format!("w/{id}"))?;
+    /// Constructs [`WallhavenClient`] without an api key.
+    /// Check out [`WallhavenClient::with_key`] to construct an instance with an api key.
+    ///
+    /// # Errors
+    ///
+    /// - [`Error::BuildingClient`] when something went wrong with the Client builder, this shouldn't happen and you probably should file an issue
+    pub fn new() -> Result<Self, Error> {
+        let client = Client::builder().build()?;
+        Ok(Self { client })
+    }
+
+    /// Fetches a wallpaper by id
+    #[doc = request_errors!()]
+    pub async fn wallpaper(&self, id: impl AsRef<str>) -> Result<WallpaperDetails, Error> {
+        let url = BASE_URL.join(&format!("w/{}", id.as_ref()))?;
 
         let res = self.client.get(url).send().await?;
-        let raw_json: RawWallpaperInfo = res.json().await?;
+        let raw_json: RawWallpaperDetails = res.json().await?;
 
         Ok(raw_json.data)
     }
 
-    async fn download(&self, url: &str, outpath: impl AsRef<Path>) -> Result<(), Error> {
-        let resp = self.client.get(url).send().await?;
-        let mut out = File::create(&outpath).await?;
+    /// Searches for wallpapers matching the request
+    #[doc = request_errors!()]
+    pub async fn search(&self, params: Option<SearchRequest>) -> Result<SearchResult, Error> {
+        let url = BASE_URL.join("search")?;
 
-        let mut bytes_stream = resp.bytes_stream();
+        // Build the request builder first
+        let res = self.client.get(url).query(&params).send().await?;
 
-        while let Some(item) = bytes_stream.next().await {
-            tokio::io::copy(&mut item?.as_ref(), &mut out).await?;
-        }
-
-        Ok(())
+        Ok(res.json().await?)
     }
 
-    pub async fn collections(&self, username: Option<&str>) -> Result<Vec<UserCollection>, Error> {
-        let url = match username {
-            None => "collections",
-            Some(username) => &format!("collections/{username}"),
-        };
-        let url = BASE_URL.join(url)?;
+    /// Fetches all the [`UserCollection`] of a certain user
+    ///
+    /// Defaults to the current if no username is provided and an api key is used
+    #[doc = request_errors!()]
+    pub async fn collections(
+        &self,
+        username: impl Into<Option<String>>,
+    ) -> Result<Vec<UserCollection>, Error> {
+        let url = username.into().map_or_else(
+            || "collections".to_string(),
+            |username| format!("collections/{username}"),
+        );
+
+        let url = BASE_URL.join(&url)?;
 
         let res = self.client.get(url).send().await?;
         let raw_json: RawUserCollection = res.json().await?;
@@ -72,14 +122,23 @@ impl WallhavenClient {
         Ok(raw_json.data)
     }
 
-    pub async fn collection_items(&self, username: &str, id: u64) -> Result<SearchResult, Error> {
+    /// Gets the collection's wallpapers.
+    #[doc = request_errors!()]
+    pub async fn collection_items(
+        &self,
+        username: &str,
+        id: u64,
+        params: Option<CollectionItemsRequest>,
+    ) -> Result<SearchResult, Error> {
         let url = BASE_URL.join(&format!("collections/{username}/{id}"))?;
 
-        let res = self.client.get(url).send().await?;
+        let res = self.client.get(url).query(&params).send().await?;
 
         Ok(res.json().await?)
     }
 
+    /// Fetches a [`Tag`] by its id
+    #[doc = request_errors!()]
     pub async fn tag(&self, id: u64) -> Result<Tag, Error> {
         let url = BASE_URL.join(&format!("tag/{id}"))?;
 
@@ -89,12 +148,24 @@ impl WallhavenClient {
         Ok(raw_json.data)
     }
 
+    /// Fetches the [`UserSettings`] of the current user. Only works if the api key was provided.
+    #[doc = request_errors!()]
     pub async fn user_settings(&self) -> Result<UserSettings, Error> {
-        let url = BASE_URL.join(&format!("settings"))?;
+        let url = BASE_URL.join("settings")?;
 
         let res = self.client.get(url).send().await?;
         let raw_json: RawUserSettings = res.json().await?;
 
         Ok(raw_json.data)
+    }
+
+    /// Downloads a [`Wallpaper`]
+    #[doc = download_errors!()]
+    pub async fn download_wallpaper(
+        &self,
+        wallpaper: &WallpaperDetails,
+    ) -> Result<impl Stream<Item = reqwest::Result<bytes::Bytes>>, Error> {
+        let resp = self.client.get(wallpaper.path.clone()).send().await?;
+        Ok(resp.bytes_stream())
     }
 }

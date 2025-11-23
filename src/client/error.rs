@@ -1,61 +1,47 @@
-use std::fmt::Display;
+use thiserror::Error;
 
-use reqwest::header::InvalidHeaderValue;
-
-#[derive(Debug)]
+/// Possible errors inside the `wallhaven-rs` crate
+#[derive(Error, Debug)]
 pub enum Error {
-    InvalidApiKey,
-    ErrorParsingPath,
-    IoError(std::io::Error),
-    UrlParsingError(url::ParseError),
+    /// Returned when an invalid api key is provided to [`WallhavenClient`]
+    #[error("Invalid api key.")]
+    InvalidApiKey(#[from] reqwest::header::InvalidHeaderValue),
+    /// Returned when a request fails to build the url from the provided parameters,
+    /// usually means the parameters are wrong
+    #[error(transparent)]
+    UrlParsingError(#[from] url::ParseError),
+    /// Returned when building [`WallhavenClient`]
+    ///
+    /// This error is thrown when building the [`rewqest`] client,
+    /// this means that its probably the library's fault if this happens (it probably will not happen though)
+    /// and you should open an issue!
+    #[error("Error building the client: {0}")]
     BuildingClient(reqwest::Error),
+    /// There was some error while sending the request, you should match the underlying [`reqwest::Error`] further
+    #[error("Error sending a request: {0}")]
     SendingRequest(reqwest::Error),
+    /// There was an error decoding the JSON, but the response was received successfully.
+    ///
+    /// Its an error either on wallhaven's side, if they sent a wrong json, or our side, if we wrote a bad model
+    #[error("Error deconding the request json: {0}")]
     DecodingJson(reqwest::Error),
-}
-
-impl Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::InvalidApiKey => write!(f, "Invalid api key!"),
-            Self::ErrorParsingPath => write!(
-                f,
-                "While parsing this wallpaper's url, we couldn't detect the extension."
-            ),
-            Self::IoError(err) => write!(f, "{}", err),
-            Self::UrlParsingError(err) => write!(f, "{}", err),
-            Self::BuildingClient(err) => write!(f, "{}", err),
-            Self::SendingRequest(err) => write!(f, "{}", err),
-            Self::DecodingJson(err) => write!(f, "{}", err),
-        }
-    }
+    /// Some request error that isn't neither [`SendingRequest`] nor [`DecodingJson`]
+    ///
+    /// You can match further the underlying [`reqwest::Error`]
+    #[error("Unknown request error: {0}")]
+    UnknownRequestError(reqwest::Error),
 }
 
 impl From<reqwest::Error> for Error {
     fn from(value: reqwest::Error) -> Self {
-        match value.is_decode() {
-            true => Error::DecodingJson(value),
-            false => match value.is_request() {
-                true => Error::SendingRequest(value),
-                false => Error::BuildingClient(value),
-            },
+        if value.is_builder() {
+            Self::BuildingClient(value)
+        } else if value.is_decode() {
+            Self::DecodingJson(value)
+        } else if value.is_request() {
+            Self::SendingRequest(value)
+        } else {
+            Self::UnknownRequestError(value)
         }
-    }
-}
-
-impl From<InvalidHeaderValue> for Error {
-    fn from(_: InvalidHeaderValue) -> Self {
-        Error::InvalidApiKey
-    }
-}
-
-impl From<url::ParseError> for Error {
-    fn from(value: url::ParseError) -> Self {
-        Error::UrlParsingError(value)
-    }
-}
-
-impl From<std::io::Error> for Error {
-    fn from(value: std::io::Error) -> Self {
-        Error::IoError(value)
     }
 }
