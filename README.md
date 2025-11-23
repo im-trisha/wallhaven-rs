@@ -1,6 +1,8 @@
-# wallhaven-api-rs
+# wallhaven-rs
 
 A wallhaven api wrapper. I found just CLIs and such on cargo, so I might as well create one for my project
+
+This crate was for a short period known as `wallhaven-api`, I then did a complete overhaul and now the code is actually nice!
 
 ## Usage
 
