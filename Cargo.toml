@@ -1,7 +1,7 @@
 [package]
 name = "wallhaven-rs"
 license = "MIT"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 authors = ["im-trisha <imtrisha2324@gmail.com>"]
 categories = ["api-bindings"]
@@ -9,7 +9,7 @@ keywords = ["api", "wrapper", "wallhaven", "wallpaper", "client"]
 description = "An api wrapper for wallhaven.cc"
 repository = "https://github.com/im-trisha/wallhaven-rs"
 homepage = "https://github.com/im-trisha/wallhaven-rs"
-documentation = "https://docs.rs/wallhaven-api"
+documentation = "https://docs.rs/wallhaven-rs"
 readme = "README.md"
 
 [dependencies]
