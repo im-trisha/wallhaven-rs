@@ -9,6 +9,7 @@ use serde_with::{BoolFromInt, serde_as};
 /// "Favorite wallpapers" is just a private collection, you can find it under the name "Default"
 #[serde_as]
 #[derive(Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct UserCollection {
     /// The collection's id
     pub id: u64,

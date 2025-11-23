@@ -4,6 +4,7 @@ use crate::Purities;
 
 /// A tag to represent a wallpaper, which is itself categorized into categories
 #[derive(Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Tag {
     /// This tag's id
     pub id: u64,

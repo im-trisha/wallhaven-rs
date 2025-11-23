@@ -1,11 +1,12 @@
 use serde::Deserialize;
-use serde_with::{DefaultOnError, DisplayFromStr, serde_as};
+use serde_with::{BoolFromInt, DefaultOnError, DisplayFromStr, serde_as};
 
 use crate::{AspectRatio, Categories, Purities, Resolution, ThumbnailResolution, ToplistRange};
 
 /// Represents user settings, mostly the default search settings
 #[serde_as]
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct UserSettings {
     /// The default wallpaper thumbnail resolution
     pub thumb_size: ThumbnailResolution,
@@ -38,4 +39,7 @@ pub struct UserSettings {
     pub tag_blacklist: Vec<String>,
     /// A list of usernames that are excluded from all searches and listings
     pub user_blacklist: Vec<String>,
+    /// If AI art is filtered out.
+    #[serde_as(as = "BoolFromInt")]
+    pub ai_art_filter: bool,
 }

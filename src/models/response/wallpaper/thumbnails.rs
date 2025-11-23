@@ -1,7 +1,7 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 /// The thumbnail of a wallpaper, in different sizes
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct Thumbnails {
     /// Matches `ThumbnailSize::Large`
     pub large: String,

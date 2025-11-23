@@ -3,7 +3,7 @@ mod thumbnails;
 mod uploader;
 
 pub use avatar::Avatar;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use serde_with::{DisplayFromStr, serde_as};
 pub use thumbnails::Thumbnails;
 pub use uploader::Uploader;
@@ -14,7 +14,8 @@ use crate::{Categories, Color, Purities, Tag};
 ///
 /// This struct represents a wallpaper in wallhaven's database
 #[serde_as]
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct WallpaperDetails {
     /// The wallpaper's id on wallhaven's database
     pub id: String,
@@ -78,7 +79,8 @@ pub struct WallpaperDetails {
     #[serde_as(as = "DisplayFromStr")]
     pub path: url::Url,
     /// The wallpaper's thumbnails
-    pub thumbs: Thumbnails,
+    #[serde(rename = "thumbs")]
+    pub thumbnails: Thumbnails,
     /// The wallpaper's tags
     pub tags: Vec<Tag>,
 }

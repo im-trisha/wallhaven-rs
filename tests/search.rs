@@ -17,8 +17,6 @@ async fn test_search_simple() {
 }
 
 #[tokio::test]
-#[allow(clippy::print_stdout)]
-#[allow(clippy::print_stderr)]
 async fn test_search_query() {
     let key = ensure_api_key();
     let_assert!(Ok(client) = WallhavenClient::with_key(key));

@@ -1,12 +1,13 @@
 use serde::Deserialize;
 use serde_with::{DisplayFromStr, serde_as};
 
-use crate::{Categories, Color, Purities};
+use crate::{Categories, Color, Purities, Thumbnails};
 
 /// This struct represents a wallpaper returned in the paginated search,
 /// which is more lightweight than a [`WallpaperDetails`]
 #[serde_as]
 #[derive(Deserialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
 pub struct WallpaperSummary {
     /// The wallpaper's id on wallhaven's database
     pub id: String,
@@ -61,6 +62,9 @@ pub struct WallpaperSummary {
     pub file_type: mime::Mime,
     /// The wallpaper's creation datetime
     pub created_at: jiff::civil::DateTime,
+    /// The wallpaper's thumbnails
+    #[serde(rename = "thumbs")]
+    pub thumbnails: Thumbnails,
     /// A list of colors that match this wallpaper
     #[serde_as(as = "Vec<DisplayFromStr>")]
     pub colors: Vec<Color>,

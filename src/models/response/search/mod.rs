@@ -10,6 +10,7 @@ pub use wallpaper_summary::*;
 
 /// Search results, see properties for more information
 #[derive(Deserialize, Clone, Debug)]
+#[serde(deny_unknown_fields)]
 pub struct SearchResult {
     /// The actual found wallpapers
     pub data: Vec<WallpaperSummary>,
