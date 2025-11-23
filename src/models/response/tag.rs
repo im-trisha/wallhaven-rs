@@ -1,10 +1,9 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 use crate::Purities;
 
 /// A tag to represent a wallpaper, which is itself categorized into categories
-#[derive(Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct Tag {
     /// This tag's id
     pub id: u64,
@@ -23,7 +22,7 @@ pub struct Tag {
     /// ## Note
     ///
     /// - There are a lot of tag categories, like, A LOT. Its not feasible to add every one of them to an enum, unfortunately.
-    /// - To my knowledge, there is no way to fetch tags from the api. I am asking the developers though! TODO
+    /// - To my knowledge, there is no way to fetch tags from the api. I am asking the developers though!
     pub category_id: u64,
     /// A string representation of the `category_id`, in english
     ///

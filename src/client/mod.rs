@@ -4,9 +4,10 @@ use futures::Stream;
 use reqwest::{Client, Url, header};
 
 mod error;
-mod shortcuts;
+mod has_path;
 
 pub use error::*;
+use has_path::*;
 
 use crate::models::{raw_models::*, *};
 
@@ -17,7 +18,15 @@ use crate::models::{raw_models::*, *};
 ///
 /// ## Examples
 ///
+/// ```rust,ignore
+/// client.wallpaper("someid").await?;
+/// client.search(None).await?;
+///
+/// let req = SearchRequestBuilder::default().build()?;
+/// client.search(Some(req)).await?;
 /// ```
+///
+/// And so on! Check out each methods/models for more informations
 #[derive(Clone)]
 pub struct WallhavenClient {
     client: Client,
@@ -126,11 +135,11 @@ impl WallhavenClient {
     #[doc = request_errors!()]
     pub async fn collection_items(
         &self,
-        username: &str,
+        username: impl AsRef<str>,
         id: u64,
         params: Option<CollectionItemsRequest>,
     ) -> Result<SearchResult, Error> {
-        let url = BASE_URL.join(&format!("collections/{username}/{id}"))?;
+        let url = BASE_URL.join(&format!("collections/{}/{id}", username.as_ref()))?;
 
         let res = self.client.get(url).query(&params).send().await?;
 
@@ -159,13 +168,30 @@ impl WallhavenClient {
         Ok(raw_json.data)
     }
 
-    /// Downloads a [`Wallpaper`]
+    /// Downloads a any wallpaper type (e.g. `WallhavenDetails` or `WallhavenSummary`)
     #[doc = download_errors!()]
     pub async fn download_wallpaper(
         &self,
-        wallpaper: &WallpaperDetails,
+        wallpaper: &impl HasPath,
     ) -> Result<impl Stream<Item = reqwest::Result<bytes::Bytes>>, Error> {
-        let resp = self.client.get(wallpaper.path.clone()).send().await?;
+        let resp = self.client.get(wallpaper.path()).send().await?;
+        Ok(resp.bytes_stream())
+    }
+
+    /// Downloads a [`Thumbnails`]
+    #[doc = download_errors!()]
+    pub async fn download_thumbnail(
+        &self,
+        thumbnail: &Thumbnails,
+        resolution: ThumbnailResolution,
+    ) -> Result<impl Stream<Item = reqwest::Result<bytes::Bytes>>, Error> {
+        let url = match resolution {
+            ThumbnailResolution::Large => thumbnail.large.clone(),
+            ThumbnailResolution::Original => thumbnail.original.clone(),
+            ThumbnailResolution::Small => thumbnail.small.clone(),
+        };
+
+        let resp = self.client.get(url).send().await?;
         Ok(resp.bytes_stream())
     }
 }

@@ -1,4 +1,8 @@
-use std::{fmt::Display, num::ParseIntError, str::FromStr};
+use std::{fmt::Display, str::FromStr};
+
+use num_enum::TryFromPrimitive;
+
+use crate::ColorParseError;
 
 /// Colors you can filter by.
 ///
@@ -10,7 +14,8 @@ use std::{fmt::Display, num::ParseIntError, str::FromStr};
 /// - `let b = (val & 0x0000FF) >> 0`
 ///
 /// This cannot be customized further as only values allowed by wallhaven can be used.
-#[derive(Clone, Copy, Debug)]
+#[repr(u32)]
+#[derive(Clone, Copy, Debug, TryFromPrimitive)]
 pub enum Color {
     /// Color with hex code 0x660000
     BloodRed = 0x66_00_00,
@@ -64,6 +69,12 @@ pub enum Color {
     Black = 0x00_00_00,
     /// Color with hex code 0x999999
     SpanishGray = 0x99_99_99,
+    /// Color with hex code 0xABBCDA
+    LightSteelBlue = 0xAB_BC_DA,
+    /// Color with hex code 0xFDADC7
+    CarnationPink = 0xFD_AD_C7,
+    /// Color with hex code 0xE7D8B1
+    CookiesAndCream = 0xE7_D8_B1,
     /// Color with hex code 0xcccccc
     ChineseSilver = 0xcc_cc_cc,
     /// Color with hex code 0xffffff
@@ -79,12 +90,13 @@ impl Display for Color {
 }
 
 impl FromStr for Color {
-    type Err = ParseIntError;
+    type Err = ColorParseError;
 
-    fn from_str(_: &str) -> Result<Self, Self::Err> {
-        // let s = s.strip_prefix("#").unwrap_or(s);
-        // let x = u32::from_str_radix(s, 16)?;
-        // TODO:
-        Ok(Self::Arsenic)
+    #[allow(clippy::print_stdout)]
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.strip_prefix("#").unwrap_or(s);
+        let x = u32::from_str_radix(s, 16)?;
+
+        Self::try_from(x).map_err(|_| ColorParseError::InvalidValue)
     }
 }

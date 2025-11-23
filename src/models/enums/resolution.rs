@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 /// Resolutions you can filter by.
 ///
-/// You can check out [`Color::dimensions`] for numerical values.
+/// You can check out [`Resolution::dimensions`] for numerical values.
 ///
 /// This cannot be customized further as only values allowed by wallhaven can be used.
 #[derive(Serialize, Deserialize, Clone, Copy, Debug)]

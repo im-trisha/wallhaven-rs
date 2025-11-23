@@ -1,10 +1,10 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 use super::Avatar;
 use crate::UserGroup;
 
 /// The uploader of a wallpaper.
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct Uploader {
     /// Username of the uploader
     pub username: String,

@@ -4,9 +4,9 @@ use serde::Deserialize;
 #[derive(Deserialize, Clone, Debug)]
 pub struct Thumbnails {
     /// Matches `ThumbnailSize::Large`
-    pub large: String,
+    pub large: url::Url,
     /// Matches `ThumbnailSize::Original`
-    pub original: String,
+    pub original: url::Url,
     /// Matches `ThumbnailSize::Small`
-    pub small: String,
+    pub small: url::Url,
 }

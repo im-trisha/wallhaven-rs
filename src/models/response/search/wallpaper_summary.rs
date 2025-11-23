@@ -4,10 +4,9 @@ use serde_with::{DisplayFromStr, serde_as};
 use crate::{Categories, Color, Purities, Thumbnails};
 
 /// This struct represents a wallpaper returned in the paginated search,
-/// which is more lightweight than a [`WallpaperDetails`]
+/// which is more lightweight than a `WallpaperDetails`
 #[serde_as]
 #[derive(Deserialize, Clone, Debug)]
-#[serde(deny_unknown_fields)]
 pub struct WallpaperSummary {
     /// The wallpaper's id on wallhaven's database
     pub id: String,

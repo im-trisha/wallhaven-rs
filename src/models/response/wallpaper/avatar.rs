@@ -1,7 +1,7 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 /// The avatar url of someone who uploaded a wallpaper, in different resolutions.
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct Avatar {
     /// 200x200 px
     #[serde(rename = "200px")]

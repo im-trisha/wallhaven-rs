@@ -16,3 +16,13 @@ async fn test_collections() {
     // But I dont think anyone other than me will run those tests and I will not rename the collection
     assert!(!res.is_empty() && res.iter().any(|c| c.label == "Default"));
 }
+
+#[tokio::test]
+async fn test_collection_items() {
+    let key = ensure_api_key();
+    let_assert!(Ok(client) = WallhavenClient::with_key(key));
+
+    let_assert!(Ok(res) = client.collection_items("AksumkA", 1, None).await);
+
+    assert!(!res.data.is_empty());
+}

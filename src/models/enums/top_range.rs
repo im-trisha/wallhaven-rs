@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 /// The time span for the toplist.
 ///
-/// For example, [`TopRange::OneDay`] will show the top wallpapers in the last 24h.
+/// For example, [`ToplistRange::OneDay`] will show the top wallpapers in the last 24h.
 ///
 /// This cannot be customized further as only values allowed by wallhaven can be used
 #[derive(Serialize, Deserialize, Clone, Copy, Debug)]

@@ -30,10 +30,8 @@ url = "2.5.7"                                       # Used for the url type and 
 mime = "0.3.17"                                     # Used for the mime::Mime type and is re-exported for ease of use
 bytes = "1.11.0"                                    # Used to return a Stream<Item=bytes::Bytes>
 futures = "0.3.31"                                  # Used for the Stream type
+num_enum = "0.7.5"                                  # Used solely for parsing the Color enum
 jiff = { version = "0.2.16", features = ["serde"] } # Used for the DateTime type
-
-# TODO: Remove, only for testing
-serde_json = "1.0.145"
 
 
 [dev-dependencies]

@@ -14,8 +14,7 @@ use crate::{Categories, Color, Purities, Tag};
 ///
 /// This struct represents a wallpaper in wallhaven's database
 #[serde_as]
-#[derive(Deserialize)]
-#[serde(deny_unknown_fields)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct WallpaperDetails {
     /// The wallpaper's id on wallhaven's database
     pub id: String,

@@ -12,7 +12,11 @@ async fn test_wallpaper_and_download() {
     let_assert!(Ok(client) = WallhavenClient::with_key(key));
 
     let_assert!(Ok(res) = client.wallpaper("lyy23p").await);
-    let_assert!(Ok(mut stream) = res.download(&client).await);
+    let_assert!(Ok(mut stream) = client.download_wallpaper(&res).await);
 
     assert!(stream.next().await.is_some());
+
+    let_assert!(Ok(mut thumbnail_stream) = client.download_thumbnail(&res.thumbnails, wallhaven_rs::ThumbnailResolution::Small).await);
+
+    assert!(thumbnail_stream.next().await.is_some());
 }

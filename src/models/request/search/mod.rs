@@ -14,6 +14,7 @@ use crate::{
 /// The search request object.
 #[serde_as]
 #[derive(Serialize, Builder, Clone, Debug)]
+#[builder(build_fn(validate = "Self::validate"))]
 #[skip_serializing_none]
 pub struct SearchRequest {
     /// A list of items of which the query is composed of
@@ -64,4 +65,14 @@ pub struct SearchRequest {
     /// Optional seed for random results
     #[builder(setter(into, strip_option), default)]
     seed: Option<String>,
+}
+
+impl SearchRequestBuilder {
+    fn validate(&self) -> Result<(), String> {
+        match (self.toplist_range.flatten(), self.sorting.flatten()) {
+            (Some(_), Some(SortingType::Toplist)) => Ok(()),
+            (Some(_), _) => Err("toplist_range is set and sorting != Toplist".to_string()),
+            _ => Ok(()),
+        }
+    }
 }
