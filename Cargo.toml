@@ -22,9 +22,9 @@ serde = { version = "1.0.228", features = ["derive"] }
 # A lot of serde helpers
 serde_with = "3.16.0"
 
-bitflags = "2.10.0"       # Used for flaggable enums
-thiserror = "2.0.17"      # Create an error type for the whole crate to use
-derive_builder = "0.20.2" # Deriving the builders for requests types
+bitflags = "2.10.0"  # Used for flaggable enums
+thiserror = "2.0.17" # Create an error type for the whole crate to use
+bon = "3.8.1"        # Deriving the builders for requests types
 
 url = "2.5.7"                                       # Used for the url type and ParseError
 mime = "0.3.17"                                     # Used for the mime::Mime type and is re-exported for ease of use

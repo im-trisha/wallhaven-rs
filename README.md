@@ -9,8 +9,8 @@ This crate was for a short period known as `wallhaven-api`, I then did a complet
 ### Creating the client
 First, you must create a `WallhavenClient`:
 ```rust
-let api_key = std::env::var("WALLHAVEN_API_KEY").ok();
-let client = WallhavenClient::new(api_key)?;
+let api_key = std::env::var("WALLHAVEN_API_KEY").unwrap();
+let client = WallhavenClient::with_key(api_key)?;
 ```
 
 This will create a `WallhavenClient` that will either run with or without api key. You could as well just:

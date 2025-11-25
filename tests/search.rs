@@ -2,9 +2,7 @@
 
 use assert2::let_assert;
 use common::ensure_api_key;
-use wallhaven_rs::{
-    Categories, Purities, Query, SearchQueryItem, SearchRequestBuilder, WallhavenClient,
-};
+use wallhaven_rs::{Categories, Purities, Query, SearchQueryItem, SearchRequest, WallhavenClient};
 mod common;
 
 #[tokio::test]
@@ -28,7 +26,7 @@ async fn test_search_query() {
     ];
 
     let_assert!(
-        Ok(query) = SearchRequestBuilder::default()
+        Ok(query) = SearchRequest::builder()
             .categories(Categories::ANIME)
             // Can't be searched "by accident", so if the results have NSFW, the query worked
             .purity(Purities::NSFW)

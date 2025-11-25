@@ -1,4 +1,4 @@
-use derive_builder::Builder;
+use bon::Builder;
 use serde::Serialize;
 use serde_with::{serde_as, skip_serializing_none};
 
@@ -12,11 +12,9 @@ use crate::Purities;
 #[skip_serializing_none]
 pub struct CollectionItemsRequest {
     /// Turn categories on or off, NSFW requires a valid api key
-    #[builder(setter(into, strip_option), default)]
     purity: Option<Purities>,
     /// Pagination, from 1->inf
     ///
     /// (Not actually infinite)
-    #[builder(setter(into, strip_option), default)]
     page: Option<u64>,
 }
