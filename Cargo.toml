@@ -1,7 +1,7 @@
 [package]
 name = "wallhaven-rs"
 license = "MIT"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2024"
 authors = ["im-trisha <imtrisha2324@gmail.com>"]
 categories = ["api-bindings"]
@@ -14,29 +14,30 @@ readme = "README.md"
 
 [dependencies]
 # Requests.
-reqwest = { version = "0.12.24", features = ["json", "stream"] }
+reqwest = { version = "0.13.1", features = ["json", "stream", "query"] }
 
 # Serialization/Deserialization
 serde = { version = "1.0.228", features = ["derive"] }
 
 # A lot of serde helpers
-serde_with = "3.16.0"
+serde_with = "3.16.1"
 
 bitflags = "2.10.0"  # Used for flaggable enums
 thiserror = "2.0.17" # Create an error type for the whole crate to use
 bon = "3.8.1"        # Deriving the builders for requests types
 
-url = "2.5.7"                                       # Used for the url type and ParseError
+# Used for the url type and ParseError
+url = { version = "2.5.8", features = ["serde"] }
 mime = "0.3.17"                                     # Used for the mime::Mime type and is re-exported for ease of use
 bytes = "1.11.0"                                    # Used to return a Stream<Item=bytes::Bytes>
 futures = "0.3.31"                                  # Used for the Stream type
 num_enum = "0.7.5"                                  # Used solely for parsing the Color enum
-jiff = { version = "0.2.16", features = ["serde"] } # Used for the DateTime type
+jiff = { version = "0.2.18", features = ["serde"] } # Used for the DateTime type
 
 
 [dev-dependencies]
 assert2 = "0.3.16"
-tokio = { version = "1.48.0", features = ["macros"] }
+tokio = { version = "1.49.0", features = ["macros"] }
 
 
 # Lints down there, you can skip safely! Maybe.

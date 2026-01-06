@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use serde::{Deserialize, Serialize};
 
 /// Resolutions you can filter by.
@@ -109,5 +111,12 @@ impl Resolution {
             Self::R3840x2880 => (3840, 2880),
             Self::R3840x3072 => (3840, 3072),
         }
+    }
+}
+
+impl Display for Resolution {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let (w, h) = self.dimensions();
+        write!(f, "{w}x{h}")
     }
 }
